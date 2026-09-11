@@ -1,0 +1,15 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: acs-image-scan-
+  namespace: acs-pipeline
+spec:
+  pipelineRef:
+    name: acs-image-scan
+  params:
+    - name: image
+      value: "registry.redhat.io/ubi9/ubi-minimal:latest"
+    - name: acs_central_endpoint
+      value: "central-stackrox.apps.YOUR_CLUSTER_DOMAIN"
+    - name: output_format
+      value: "table"

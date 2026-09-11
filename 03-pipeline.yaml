@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: acs-image-scan
+  namespace: acs-pipeline
+spec:
+  params:
+    - name: image
+      type: string
+      description: Full image reference to scan (e.g. registry.example.com/myapp:latest)
+    - name: acs_central_endpoint
+      type: string
+      description: ACS Central endpoint (host:port, no https://)
+    - name: output_format
+      type: string
+      default: table
+      description: Output format (table, json, csv)
+  tasks:
+    - name: scan-image
+      taskRef:
+        name: acs-image-scan
+      params:
+        - name: image
+          value: $(params.image)
+        - name: acs_central_endpoint
+          value: $(params.acs_central_endpoint)
+        - name: output_format
+          value: $(params.output_format)
