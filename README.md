@@ -73,7 +73,7 @@ Go to **Pipelines > acs-image-scan > Start** and fill in the parameters.
 ```bash
 tkn pipeline start acs-image-scan \
   -p image=registry.redhat.io/ubi9/ubi-minimal:latest \
-  -p acs_central_endpoint=central-stackrox.apps.YOUR_CLUSTER_DOMAIN \
+  -p acs_central_endpoint=central-stackrox.apps.YOUR_CLUSTER_DOMAIN:443 \
   -p output_format=table \
   --showlog \
   -n acs-pipeline
@@ -84,7 +84,7 @@ tkn pipeline start acs-image-scan \
 | Parameter              | Description                                           | Default |
 |------------------------|-------------------------------------------------------|---------|
 | `image`                | Full image reference to scan                          | —       |
-| `acs_central_endpoint` | ACS Central endpoint (host:port, no `https://`)       | —       |
+| `acs_central_endpoint` | ACS Central endpoint (host:443, no `https://`)       | —       |
 | `output_format`        | Output format: `table`, `json`, or `csv`              | `table` |
 
 ## What it does
