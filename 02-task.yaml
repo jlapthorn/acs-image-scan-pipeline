@@ -1,0 +1,78 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: acs-image-scan
+  namespace: acs-pipeline
+spec:
+  params:
+    - name: image
+      type: string
+      description: Full image reference to scan (e.g. registry.example.com/myapp:latest)
+    - name: acs_central_endpoint
+      type: string
+      description: ACS Central endpoint (host:port, no https://)
+    - name: output_format
+      type: string
+      default: table
+      description: Output format (table, json, csv)
+  steps:
+    - name: download-roxctl
+      image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+      script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        echo "Downloading roxctl from https://$(params.acs_central_endpoint)..."
+        curl -sfL -k \
+          "https://$(params.acs_central_endpoint)/api/cli/download/roxctl-linux" \
+          -o /shared/roxctl
+
+        chmod +x /shared/roxctl
+        /shared/roxctl version
+        echo "roxctl downloaded successfully."
+      volumeMounts:
+        - name: shared
+          mountPath: /shared
+
+    - name: scan-image
+      image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+      env:
+        - name: ROX_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: roxctl-api-token
+              key: rox_api_token
+        - name: ROX_CENTRAL_ADDRESS
+          value: "$(params.acs_central_endpoint)"
+      script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        echo "============================================"
+        echo "Scanning image: $(params.image)"
+        echo "ACS Central:    ${ROX_CENTRAL_ADDRESS}"
+        echo "============================================"
+
+        /shared/roxctl image scan \
+          --insecure-skip-tls-verify \
+          --endpoint "${ROX_CENTRAL_ADDRESS}" \
+          --image "$(params.image)" \
+          --output "$(params.output_format)"
+
+        echo ""
+        echo "============================================"
+        echo "Running image check (policy evaluation)..."
+        echo "============================================"
+
+        /shared/roxctl image check \
+          --insecure-skip-tls-verify \
+          --endpoint "${ROX_CENTRAL_ADDRESS}" \
+          --image "$(params.image)" \
+          --output "$(params.output_format)" || true
+      volumeMounts:
+        - name: shared
+          mountPath: /shared
+
+  volumes:
+    - name: shared
+      emptyDir: {}
