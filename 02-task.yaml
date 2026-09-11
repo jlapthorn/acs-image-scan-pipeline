@@ -11,6 +11,7 @@ spec:
     - name: acs_central_endpoint
       type: string
       description: ACS Central endpoint (host:port, no https://)
+      default: ""
     - name: output_format
       type: string
       default: table
@@ -18,12 +19,19 @@ spec:
   steps:
     - name: download-roxctl
       image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+      env:
+        - name: ROX_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: roxctl-api-token
+              key: rox_api_token
       script: |
         #!/usr/bin/env bash
         set -euo pipefail
 
         echo "Downloading roxctl from https://$(params.acs_central_endpoint)..."
         curl -sfL -k \
+          -H "Authorization: Bearer ${ROX_API_TOKEN}" \
           "https://$(params.acs_central_endpoint)/api/cli/download/roxctl-linux" \
           -o /shared/roxctl
 
