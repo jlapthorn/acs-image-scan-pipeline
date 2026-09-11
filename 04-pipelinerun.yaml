@@ -9,7 +9,3 @@ spec:
   params:
     - name: image
       value: "registry.redhat.io/ubi9/ubi-minimal:latest"
-    - name: acs_central_endpoint
-      value: "central-stackrox.apps.YOUR_CLUSTER_DOMAIN:443"
-    - name: output_format
-      value: "table"

@@ -7,15 +7,16 @@ spec:
   params:
     - name: image
       type: string
-      description: Full image reference to scan (e.g. registry.example.com/myapp:latest)
+      description: Full image reference to scan
+      default: "registry.redhat.io/ubi9/ubi-minimal:latest"
     - name: acs_central_endpoint
       type: string
-      description: ACS Central endpoint (host:port, no https://)
-      default: ""
+      description: ACS Central endpoint (host:port)
+      default: "central-stackrox.apps.cluster-m7s8x.dyn.redhatworkshops.io:443"
     - name: output_format
       type: string
-      default: table
       description: Output format (table, json, csv)
+      default: "table"
   steps:
     - name: download-roxctl
       image: registry.access.redhat.com/ubi9/ubi-minimal:latest
